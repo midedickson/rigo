@@ -1,5 +1,6 @@
 package rigo
 
-func initialize() {
-	store["initiated"] = true
+func initialize() *MessageQueue {
+	messageQueue := &MessageQueue{}
+	return messageQueue
 }
