@@ -1,5 +1,5 @@
 package rigo
 
-func Init() {
+func initialize() {
 	store["initiated"] = true
 }
