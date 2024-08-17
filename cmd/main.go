@@ -1,8 +1,6 @@
 package main
 
-import (
-	"github.com/midedickson/rigo/pkg/rigo"
-)
+import "github.com/midedickson/rigo"
 
 func main() {
 	// Start the rigo server, abstract the initialization

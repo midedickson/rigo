@@ -5,14 +5,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/midedickson/rigo/pkg/rigo"
+	"github.com/midedickson/rigo"
 )
 
 func main() {
 	// plan here is to remove main function and convert to mqueue package
 	// may or may not run on a server.
 	var wg sync.WaitGroup
-	messageQueue := rigo.MessageQueue{}
+	messageQueue := rigo.Queue("demo")
 	result := make(chan rigo.Message, 5)
 
 	// Start the producer
