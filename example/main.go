@@ -12,7 +12,7 @@ func main() {
 	// plan here is to remove main function and convert to mqueue package
 	// may or may not run on a server.
 	var wg sync.WaitGroup
-	messageQueue := rigo.Queue("demo")
+	messageQueue := rigo.NewQueue()
 	result := make(chan rigo.Message, 5)
 
 	// Start the producer
@@ -22,7 +22,7 @@ func main() {
 		for i := 1; i <= 5; i++ {
 			message := rigo.Message{ID: i, Content: fmt.Sprintf("Message %d", i)}
 			wg.Add(1)
-			go messageQueue.Produce(&wg, message)
+			go messageQueue.Produce(&wg, &message)
 			time.Sleep(time.Second)
 		}
 	}()
@@ -33,7 +33,7 @@ func main() {
 		defer wg.Done()
 		for {
 			wg.Add(1)
-			go messageQueue.Consume(&wg, result)
+			go messageQueue.Consume(&wg)
 			time.Sleep(time.Second)
 		}
 	}()
