@@ -21,13 +21,13 @@ func main() {
 	}
 	for {
 		// Accept incoming connections
-		_, err := server.Accept()
+		conn, err := server.Accept()
 		if err != nil {
 			fmt.Println("Error accepting connection:", err)
 			continue
 		}
 
 		// Handle the connection in a new goroutine
-		// go handleConnection(conn, queue)
+		go rigo.HandleConnection(conn)
 	}
 }

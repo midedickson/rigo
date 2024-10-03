@@ -6,7 +6,7 @@ import (
 )
 
 // Consume removes and returns a message from the message queue
-func (mq *Queue) Consume(wg *sync.WaitGroup) *Message {
+func (mq *Queue) consume(wg *sync.WaitGroup) *Message {
 	defer wg.Done()
 	mq.lock.Lock()
 	defer mq.lock.Unlock()
@@ -20,4 +20,8 @@ func (mq *Queue) Consume(wg *sync.WaitGroup) *Message {
 	mq.messages = mq.messages[1:]
 	fmt.Printf("Consumed: %+v\n", message)
 	return &message
+}
+
+func (channel *Channel) Consume(wg *sync.WaitGroup) *Message {
+	return channel.queue.consume(wg)
 }
