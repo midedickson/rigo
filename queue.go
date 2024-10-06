@@ -10,7 +10,7 @@ type Queue struct {
 	lock     sync.Mutex
 }
 
-func NewQueue() *Queue {
+func newQueue() *Queue {
 	return &Queue{
 		lock: sync.Mutex{},
 	}

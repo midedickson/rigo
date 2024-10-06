@@ -13,7 +13,7 @@ type Connection struct {
 	channels map[string]*Channel
 }
 
-func NewConnection(conn net.Conn) *Connection {
+func newConnection(conn net.Conn) *Connection {
 	return &Connection{
 		conn:     conn,
 		mu:       sync.Mutex{},
@@ -41,7 +41,7 @@ func (c *Connection) getChannel(name string) (*Channel, bool) {
 	return channel, exists
 }
 
-func (c *Connection) RunCommand(wg *sync.WaitGroup, commandString string) error {
+func (c *Connection) runCommand(wg *sync.WaitGroup, commandString string) error {
 	parts := SplitCommand(commandString)
 	command := parts[0]
 
@@ -51,7 +51,7 @@ func (c *Connection) RunCommand(wg *sync.WaitGroup, commandString string) error 
 	case PRODUCE:
 		return c.handleProduceCommand(wg, parts)
 	case CONSUME:
-		m, err := c.handleConsumeCommand(wg, parts)
+		m, err := c.handleConsumeCommand(parts)
 		if err != nil {
 			return err
 		}
@@ -88,7 +88,7 @@ func (c *Connection) handleProduceCommand(wg *sync.WaitGroup, parts []string) er
 	return nil
 }
 
-func (c *Connection) handleConsumeCommand(wg *sync.WaitGroup, parts []string) (*Message, error) {
+func (c *Connection) handleConsumeCommand(parts []string) (*Message, error) {
 	// message parts format: "CONSUME <channel>"
 	if len(parts) < 2 {
 		return nil, fmt.Errorf("channel name content are required for CONSUME command")
@@ -98,7 +98,7 @@ func (c *Connection) handleConsumeCommand(wg *sync.WaitGroup, parts []string) (*
 		return nil, fmt.Errorf("channel '%s' not found", parts[1])
 	}
 
-	m := channel.Consume(wg)
+	m := channel.Consume()
 	return m, nil
 }
 
@@ -125,14 +125,14 @@ func HandleConnection(rawConn net.Conn) {
 	wg := &sync.WaitGroup{}
 	defer wg.Wait()
 
-	conn := NewConnection(rawConn)
+	conn := newConnection(rawConn)
 	for {
 		commandString, err := readCommandFromConnection(conn.conn)
 		if err != nil {
 			fmt.Printf("Error reading command: %v\n", err)
 			break
 		}
-		err = conn.RunCommand(wg, commandString)
+		err = conn.runCommand(wg, commandString)
 		if err != nil {
 			fmt.Printf("Error handling command: %v\n", err)
 			break

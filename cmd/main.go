@@ -27,7 +27,7 @@ func main() {
 			continue
 		}
 
-		// Handle the connection in a new goroutine
+		// Handle every new connection in a goroutine
 		go rigo.HandleConnection(conn)
 	}
 }

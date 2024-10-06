@@ -12,6 +12,6 @@ func NewChannel(name string) *Channel {
 	return &Channel{
 		Name:  name,
 		mu:    sync.Mutex{},
-		queue: NewQueue(),
+		queue: newQueue(),
 	}
 }

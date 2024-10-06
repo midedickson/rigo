@@ -2,12 +2,10 @@ package rigo
 
 import (
 	"fmt"
-	"sync"
 )
 
 // Consume removes and returns a message from the message queue
-func (mq *Queue) consume(wg *sync.WaitGroup) *Message {
-	defer wg.Done()
+func (mq *Queue) consume() *Message {
 	mq.lock.Lock()
 	defer mq.lock.Unlock()
 
@@ -22,6 +20,6 @@ func (mq *Queue) consume(wg *sync.WaitGroup) *Message {
 	return &message
 }
 
-func (channel *Channel) Consume(wg *sync.WaitGroup) *Message {
-	return channel.queue.consume(wg)
+func (channel *Channel) Consume() *Message {
+	return channel.queue.consume()
 }

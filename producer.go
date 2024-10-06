@@ -15,5 +15,6 @@ func (mq *Queue) produce(wg *sync.WaitGroup, message *Message) {
 }
 
 func (channel *Channel) Produce(wg *sync.WaitGroup, message *Message) {
-	channel.queue.produce(wg, message)
+	wg.Add(1)
+	go channel.queue.produce(wg, message)
 }

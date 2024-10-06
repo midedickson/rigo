@@ -32,8 +32,7 @@ func main() {
 	go func() {
 		defer wg.Done()
 		for {
-			wg.Add(1)
-			go newChannel.Consume(&wg)
+			newChannel.Consume()
 			time.Sleep(time.Second)
 		}
 	}()
