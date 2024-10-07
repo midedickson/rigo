@@ -10,18 +10,18 @@ import (
 type Connection struct {
 	conn     net.Conn
 	mu       sync.Mutex
-	channels map[string]*Channel
+	channels map[string]IChannel
 }
 
 func newConnection(conn net.Conn) *Connection {
 	return &Connection{
 		conn:     conn,
 		mu:       sync.Mutex{},
-		channels: make(map[string]*Channel),
+		channels: make(map[string]IChannel),
 	}
 }
 
-func (c *Connection) openChannel(name string) *Channel {
+func (c *Connection) openChannel(name string) IChannel {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -34,7 +34,7 @@ func (c *Connection) openChannel(name string) *Channel {
 	return channel
 }
 
-func (c *Connection) getChannel(name string) (*Channel, bool) {
+func (c *Connection) getChannel(name string) (IChannel, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	channel, exists := c.channels[name]

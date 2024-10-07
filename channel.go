@@ -5,7 +5,7 @@ import "sync"
 type Channel struct {
 	mu    sync.Mutex
 	Name  string
-	queue *Queue
+	queue IQueue
 }
 
 func NewChannel(name string) *Channel {
