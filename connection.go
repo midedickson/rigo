@@ -129,13 +129,17 @@ func HandleConnection(rawConn net.Conn) {
 	for {
 		commandString, err := readCommandFromConnection(conn.conn)
 		if err != nil {
+			rawConn.Write([]byte("err: " + err.Error()))
 			fmt.Printf("Error reading command: %v\n", err)
-			break
+			continue
+			// break
 		}
 		err = conn.runCommand(wg, commandString)
 		if err != nil {
+			rawConn.Write([]byte("err: " + err.Error()))
 			fmt.Printf("Error handling command: %v\n", err)
-			break
+			continue
+			// break
 		}
 	}
 }
