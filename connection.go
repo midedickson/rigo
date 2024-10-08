@@ -1,7 +1,9 @@
 package rigo
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"net"
 	"strings"
 	"sync"
@@ -47,15 +49,27 @@ func (c *Connection) runCommand(wg *sync.WaitGroup, commandString string) error 
 
 	switch command {
 	case CHANNEL:
-		return c.handleChannelCommand(parts)
+		err := c.handleChannelCommand(parts)
+		if err == nil {
+			c.conn.Write([]byte("OK"))
+		}
+		return err
 	case PRODUCE:
-		return c.handleProduceCommand(wg, parts)
+		err := c.handleProduceCommand(wg, parts)
+		if err == nil {
+			c.conn.Write([]byte("OK"))
+		}
+		return err
 	case CONSUME:
 		m, err := c.handleConsumeCommand(parts)
 		if err != nil {
 			return err
 		}
-		c.conn.Write([]byte(m.Content))
+		if m != nil {
+			c.conn.Write([]byte(m.Content))
+		} else {
+			c.conn.Write([]byte("EMPTY"))
+		}
 		return nil
 	case QUIT:
 		return c.handleQuitCommand()
@@ -108,15 +122,15 @@ func (c *Connection) handleQuitCommand() error {
 	return nil
 }
 
-func readCommandFromConnection(rawConn net.Conn) (string, error) {
-	buf := make([]byte, 1024)
-	n, err := rawConn.Read(buf)
+func readCommandString(bufR *bufio.Reader) (string, error) {
+	// Read until a newline delimiter is encountered
+	command, err := bufR.ReadString('\n')
 	if err != nil {
 		return "", err
 	}
-	command := strings.TrimSpace(string(buf[:n]))
+	command = strings.TrimSpace(command)
 	if len(command) == 0 {
-		return "", fmt.Errorf("empty command received")
+		return "", errEmptyCommand
 	}
 	return command, nil
 }
@@ -126,20 +140,29 @@ func HandleConnection(rawConn net.Conn) {
 	defer wg.Wait()
 
 	conn := newConnection(rawConn)
+	// Create a buffered reader to read the incoming stream
+	reader := bufio.NewReader(conn.conn)
 	for {
-		commandString, err := readCommandFromConnection(conn.conn)
+		commandString, err := readCommandString(reader)
 		if err != nil {
+			if err == io.EOF {
+				fmt.Println("Connection closed.")
+				break
+			}
+			if err == errEmptyCommand {
+				fmt.Println("Empty command received.")
+				continue
+			}
 			rawConn.Write([]byte("err: " + err.Error()))
 			fmt.Printf("Error reading command: %v\n", err)
 			continue
-			// break
 		}
+		fmt.Println("final command string: " + commandString)
 		err = conn.runCommand(wg, commandString)
 		if err != nil {
 			rawConn.Write([]byte("err: " + err.Error()))
 			fmt.Printf("Error handling command: %v\n", err)
 			continue
-			// break
 		}
 	}
 }

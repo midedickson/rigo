@@ -10,7 +10,7 @@ type Server struct {
 
 func NewServer(opt *Options) (*Server, error) {
 	opt.init()
-	listener, err := net.Listen("tcp", ":"+opt.Port)
+	listener, err := net.Listen("tcp", opt.Port)
 	if err != nil {
 		return nil, err
 	}
